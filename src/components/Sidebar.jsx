@@ -1,9 +1,11 @@
 import React from 'react'
+import { use } from 'react'
 import { useSelector } from 'react-redux'
 
 const Sidebar = ({ currentPage, onPageChange }) => {
   const { user } = useSelector((state) => state.auth)
   const { tasks } = useSelector((state) => state.tasks)
+  const { projects } = useSelector((state) => state.projects)
 
   // Calculate task statistics
   const totalTasks = tasks.length
@@ -34,17 +36,17 @@ const Sidebar = ({ currentPage, onPageChange }) => {
       ),
       badge: pendingTasks > 0 ? pendingTasks : null,
     },
-    // {
-    //   id: 'analytics',
-    //   label: 'Analytics',
-    //   icon: (
-    //     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    //       <line x1="18" y1="20" x2="18" y2="10"></line>
-    //       <line x1="12" y1="20" x2="12" y2="4"></line>
-    //       <line x1="6" y1="20" x2="6" y2="14"></line>
-    //     </svg>
-    //   ),
-    // },
+    {
+      id: 'projects',
+      label: 'Projects',
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <line x1="18" y1="20" x2="18" y2="10"></line>
+          <line x1="12" y1="20" x2="12" y2="4"></line>
+          <line x1="6" y1="20" x2="6" y2="14"></line>
+        </svg>
+      ),
+    },
     // {
     //   id: 'settings',
     //   label: 'Settings',

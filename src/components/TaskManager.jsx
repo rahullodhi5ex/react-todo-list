@@ -4,6 +4,7 @@ import { logoutUser, initializeAuth } from '../store/authSlice'
 import TaskList from './TaskList'
 import Sidebar from './Sidebar'
 import Dashboard from './Dashboard'
+import Projects from './Projects'
 
 const TaskManager = () => {
   const dispatch = useDispatch()
@@ -47,6 +48,8 @@ const TaskManager = () => {
         return <Dashboard />
       case 'tasks':
         return <TaskList />
+      case 'projects':
+        return <Projects />
       case 'analytics':
         return (
           <div className="coming-soon">

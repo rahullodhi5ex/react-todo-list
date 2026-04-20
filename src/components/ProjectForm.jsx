@@ -1,30 +1,33 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { createTask, updateTask, clearError } from '../store/taskSlice'
+import { createProject, updateProject, clearError } from '../store/projectSlice'
 
-const TaskForm = ({ task, onClose }) => {
+const ProjectForm = ({ project, onClose }) => {
   const dispatch = useDispatch()
-  const { status, error } = useSelector((state) => state.tasks)
+  const { status, error } = useSelector((state) => state.projects)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    completed: false
+    startdate: '',
+    status: false
   })
   const [formErrors, setFormErrors] = useState({
     title: '',
-    description: ''
+    description: '',
+    startdate: ''
   })
 
   useEffect(() => {
-    if (task) {
+    if (project) {
       setFormData({
-        title: task.title || '',
-        description: task.description || '',
-        completed: task.completed === true
+        title: project.title || '',
+        description: project.description || '',
+        startdate: project.startdate || '',
+        status: project.status === true
       })
     }
-    setFormErrors({ title: '', description: '' })
-  }, [task])
+    setFormErrors({ title: '', description: '', startdate: '' })
+  }, [project])
 
   useEffect(() => {
     if (error) {
@@ -53,22 +56,26 @@ const TaskForm = ({ task, onClose }) => {
     } else if (formData.description.trim().length > 500) {
       errors.description = 'Description must be less than 500 characters'
     }
+
+    if (!formData.startdate) {
+      errors.startdate = 'Start date is required'
+    }
     
     setFormErrors(errors)
     return Object.keys(errors).length === 0
   }
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    // Convert completed field to boolean
-    const processedValue = name === 'completed' ? value === 'true' : value
+    const { name, value, type } = e.target
+    // Convert status field to boolean for checkbox
+    const processedValue = type === 'checkbox' ? e.target.checked : value
     setFormData(prev => ({
       ...prev,
       [name]: processedValue
     }))
     
     // Clear error for this field when user starts typing
-    if (name !== 'completed') {
+    if (name !== 'status') {
       setFormErrors(prev => ({
         ...prev,
         [name]: ''
@@ -83,23 +90,24 @@ const TaskForm = ({ task, onClose }) => {
       return
     }
 
-    if (task) {
-      const taskId = task.id || task._id;
-      // Send completed field for update
+    if (project) {
+      const projectId = project.id || project._id;
+      // Send status field for update
       const updateData = {
         title: formData.title,
         description: formData.description,
-        completed: formData.completed
+        startdate: formData.startdate,
+        status: formData.status
       };
-      const result = await dispatch(updateTask({ id: taskId, taskData: updateData }))
-      if (updateTask.fulfilled.match(result)) {
+      const result = await dispatch(updateProject({ id: projectId, projectData: updateData }))
+      if (updateProject.fulfilled.match(result)) {
         onClose()
-      } else if (updateTask.rejected.match(result)) {
+      } else if (updateProject.rejected.match(result)) {
         console.log('Update failed, keeping form open')
       }
     } else {
-      const result = await dispatch(createTask(formData))
-      if (createTask.fulfilled.match(result)) {
+      const result = await dispatch(createProject(formData))
+      if (createProject.fulfilled.match(result)) {
         onClose()
       }
     }
@@ -109,7 +117,7 @@ const TaskForm = ({ task, onClose }) => {
     <div className="form-overlay">
       <div className="form-container">
         <div className="form-header">
-          <h3>{task ? 'Edit Task' : 'Create New Task'}</h3>
+          <h3>{project ? 'Edit Project' : 'Create New Project'}</h3>
           <button className="btn-close" onClick={onClose}>×</button>
         </div>
 
@@ -121,7 +129,7 @@ const TaskForm = ({ task, onClose }) => {
         </div>
       )}
 
-        <form onSubmit={handleSubmit} className="task-form">
+        <form onSubmit={handleSubmit} className="project-form">
           <div className="form-group">
             <label htmlFor="title">Title *</label>
             <input
@@ -130,7 +138,7 @@ const TaskForm = ({ task, onClose }) => {
               name="title"
               value={formData.title}
               onChange={handleChange}
-              placeholder="Enter task title (3-100 characters)"
+              placeholder="Enter project title (3-100 characters)"
             />
             {formErrors.title && (
               <span className="error-message">{formErrors.title}</span>
@@ -144,7 +152,7 @@ const TaskForm = ({ task, onClose }) => {
               name="description"
               value={formData.description}
               onChange={handleChange}
-              placeholder="Enter task description (10-500 characters)"
+              placeholder="Enter project description (10-500 characters)"
               rows="4"
             />
             {formErrors.description && (
@@ -153,15 +161,29 @@ const TaskForm = ({ task, onClose }) => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="completed">Status</label>
+            <label htmlFor="startdate">Start Date *</label>
+            <input
+              type="date"
+              id="startdate"
+              name="startdate"
+              value={formData.startdate}
+              onChange={handleChange}
+            />
+            {formErrors.startdate && (
+              <span className="error-message">{formErrors.startdate}</span>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="status">Status</label>
             <select
-              id="completed"
-              name="completed"
-              value={formData.completed}
+              id="status"
+              name="status"
+              value={formData.status}
               onChange={handleChange}
             >
-              <option value={false}>Not Done</option>
-              <option value={true}>Done</option>
+              <option value={false}>Inactive</option>
+              <option value={true}>Active</option>
             </select>
           </div>
 
@@ -178,7 +200,7 @@ const TaskForm = ({ task, onClose }) => {
               className="btn btn-primary"
               disabled={status === 'loading'}
             >
-              {status === 'loading' ? 'Saving...' : (task ? 'Update Task' : 'Create Task')}
+              {status === 'loading' ? 'Saving...' : (project ? 'Update Project' : 'Create Project')}
             </button>
           </div>
         </form>
@@ -187,4 +209,4 @@ const TaskForm = ({ task, onClose }) => {
   )
 }
 
-export default TaskForm
+export default ProjectForm
