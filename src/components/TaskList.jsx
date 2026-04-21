@@ -1,20 +1,33 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import { fetchTasks, deleteTask, setSearchTerm } from '../store/taskSlice'
+import { fetchProjects } from '../store/projectSlice'
 import TaskForm from './TaskForm'
 
 const TaskList = () => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const { filteredTasks, status, error, searchTerm } = useSelector((state) => state.tasks)
+  const { projects } = useSelector((state) => state.projects)
   const [editingTask, setEditingTask] = useState(null)
   const [showForm, setShowForm] = useState(false)
   const [sortConfig, setSortConfig] = useState({ key: 'title', direction: 'ascending' })
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage] = useState(10)
+  const [selectedProject, setSelectedProject] = useState('')
 
   useEffect(() => {
     dispatch(fetchTasks())
+    dispatch(fetchProjects())
   }, [dispatch])
+
+  useEffect(() => {
+    // Auto-select first project when projects are loaded
+    if (projects.length > 0 && !selectedProject) {
+      setSelectedProject(projects[0]._id || projects[0].id)
+    }
+  }, [projects, selectedProject])
 
   const handleDelete = (id) => {
     if (window.confirm('Are you sure you want to delete this task?')) {
@@ -32,6 +45,15 @@ const TaskList = () => {
     setCurrentPage(1) // Reset to first page on search
   }
 
+  const handleProjectFilter = (e) => {
+    setSelectedProject(e.target.value)
+    setCurrentPage(1) // Reset to first page on project filter
+  }
+
+  const handleTaskClick = (taskId) => {
+    navigate(`/task/${taskId}`)
+  }
+
   const handleFormClose = () => {
     setShowForm(false)
     setEditingTask(null)
@@ -45,9 +67,19 @@ const TaskList = () => {
     setSortConfig({ key, direction })
   }
 
-  // Sort the tasks
+  // Sort and filter the tasks
   const sortedTasks = React.useMemo(() => {
     let sortableTasks = [...filteredTasks]
+    
+    // Filter by selected project
+    if (selectedProject) {
+      sortableTasks = sortableTasks.filter(task => {
+        const taskProjectId = task.project?._id || task.project
+        return taskProjectId === selectedProject
+      })
+    }
+    
+    // Sort tasks
     if (sortConfig.key !== null) {
       sortableTasks.sort((a, b) => {
         if (a[sortConfig.key] < b[sortConfig.key]) {
@@ -60,7 +92,7 @@ const TaskList = () => {
       })
     }
     return sortableTasks
-  }, [filteredTasks, sortConfig])
+  }, [filteredTasks, sortConfig, selectedProject])
 
   // Pagination
   const indexOfLastItem = currentPage * itemsPerPage
@@ -87,14 +119,29 @@ const TaskList = () => {
       </div>
 
       <div className="table-controls">
-        <div className="search-container">
-          <input
-            type="text"
-            placeholder="Search tasks..."
-            value={searchTerm}
-            onChange={handleSearch}
-            className="search-input"
-          />
+        <div className="filters-section">
+          <div className="project-filter-container">
+            <select
+              value={selectedProject}
+              onChange={handleProjectFilter}
+              className="project-filter-select"
+            >
+              {projects.map((project) => (
+                <option key={project._id || project.id} value={project._id || project.id}>
+                  {project.title}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="search-container">
+            <input
+              type="text"
+              placeholder="Search tasks..."
+              value={searchTerm}
+              onChange={handleSearch}
+              className="search-input"
+            />
+          </div>
         </div>
         <div className="table-info">
           Showing {currentItems.length} of {sortedTasks.length} tasks
@@ -156,7 +203,13 @@ const TaskList = () => {
                   return (
                   <tr key={taskId} className="table-row">
                     <td className="table-cell title-cell">
-                      <div className="task-title">{task.title}</div>
+                      <div 
+                        className="task-title clickable" 
+                        onClick={() => handleTaskClick(taskId)}
+                        title="Click to view task details"
+                      >
+                        {task.title}
+                      </div>
                     </td>
                     <td className="table-cell description-cell">
                       <div className="task-description-truncated">

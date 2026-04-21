@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { createTask, updateTask, clearError } from '../store/taskSlice'
+import { fetchProjects } from '../store/projectSlice'
 
 const TaskForm = ({ task, onClose }) => {
   const dispatch = useDispatch()
   const { status, error } = useSelector((state) => state.tasks)
+  const { projects } = useSelector((state) => state.projects)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    completed: false
+    completed: false,
+    project: ''
   })
   const [formErrors, setFormErrors] = useState({
     title: '',
@@ -16,11 +19,17 @@ const TaskForm = ({ task, onClose }) => {
   })
 
   useEffect(() => {
+    // Fetch projects when component mounts
+    dispatch(fetchProjects())
+  }, [dispatch])
+
+  useEffect(() => {
     if (task) {
       setFormData({
         title: task.title || '',
         description: task.description || '',
-        completed: task.completed === true
+        completed: task.completed === true,
+        project: task.project?._id || task.project || ''
       })
     }
     setFormErrors({ title: '', description: '' })
@@ -89,7 +98,8 @@ const TaskForm = ({ task, onClose }) => {
       const updateData = {
         title: formData.title,
         description: formData.description,
-        completed: formData.completed
+        completed: formData.completed,
+        project: formData.project
       };
       const result = await dispatch(updateTask({ id: taskId, taskData: updateData }))
       if (updateTask.fulfilled.match(result)) {
@@ -150,6 +160,23 @@ const TaskForm = ({ task, onClose }) => {
             {formErrors.description && (
               <span className="error-message">{formErrors.description}</span>
             )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="project">Project</label>
+            <select
+              id="project"
+              name="project"
+              value={formData.project}
+              onChange={handleChange}
+            >
+              <option value="">Select a project</option>
+              {projects.map((project) => (
+                <option key={project._id || project.id} value={project._id || project.id}>
+                  {project.title}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="form-group">

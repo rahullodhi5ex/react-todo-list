@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import { BrowserRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { useDispatch, useSelector } from 'react-redux'
 import { store } from './store/store'
@@ -61,7 +62,9 @@ function AppContent() {
 function App() {
   return (
     <Provider store={store}>
-      <AppContent />
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
     </Provider>
   )
 }

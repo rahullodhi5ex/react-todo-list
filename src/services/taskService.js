@@ -31,19 +31,19 @@ taskService.interceptors.request.use(
 // Add response interceptor for error handling and debugging
 taskService.interceptors.response.use(
   (response) => {
-    console.log('Response:', JSON.stringify(response.data, null, 2))
     return response
   },
   (error) => {
-    console.log('Response Error:', error)
+    console.error('Task Service Error:', error)
     
-    if (error.code === 'NETWORK_ERROR' || error.message.includes('Network Error')) {
-      console.log('Network Error Details:', {
-        baseURL: API_BASE_URL,
-        error: error.message,
-        code: error.code,
-        config: error.config
-      })
+    // Handle authentication errors
+    if (error.response?.status === 401) {
+      // Clear invalid token
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      
+      // Redirect to login (this will be handled by the app's auth state)
+      window.location.href = '/login'
     }
     
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong'

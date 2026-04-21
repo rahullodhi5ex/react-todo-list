@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
+import { Routes, Route } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { logoutUser, initializeAuth } from '../store/authSlice'
 import TaskList from './TaskList'
 import Sidebar from './Sidebar'
 import Dashboard from './Dashboard'
 import Projects from './Projects'
+import TaskDetail from './TaskDetail'
 
 const TaskManager = () => {
   const dispatch = useDispatch()
@@ -12,7 +14,6 @@ const TaskManager = () => {
   const { tasks } = useSelector((state) => state.tasks)
   const [showProfile, setShowProfile] = useState(false)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
-  const [currentPage, setCurrentPage] = useState('dashboard')
 
   // Calculate real task statistics
   const totalTasks = tasks.length
@@ -38,35 +39,28 @@ const TaskManager = () => {
     window.location.reload() // Reload to reset the app state
   }
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page)
-  }
-
   const renderCurrentPage = () => {
-    switch (currentPage) {
-      case 'dashboard':
-        return <Dashboard />
-      case 'tasks':
-        return <TaskList />
-      case 'projects':
-        return <Projects />
-      case 'analytics':
-        return (
+    return (
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/tasks" element={<TaskList />} />
+        <Route path="/projects" element={<Projects />} />
+        <Route path="/task/:id" element={<TaskDetail />} />
+        <Route path="/analytics" element={
           <div className="coming-soon">
             <h2>Analytics</h2>
             <p>Detailed analytics and reports coming soon!</p>
           </div>
-        )
-      case 'settings':
-        return (
+        } />
+        <Route path="/settings" element={
           <div className="coming-soon">
             <h2>Settings</h2>
             <p>Application settings and preferences coming soon!</p>
           </div>
-        )
-      default:
-        return <Dashboard />
-    }
+        } />
+      </Routes>
+    )
   }
 
   if (!isAuthenticated) {
@@ -75,7 +69,7 @@ const TaskManager = () => {
 
   return (
     <div className="task-manager">
-      <Sidebar currentPage={currentPage} onPageChange={handlePageChange} />
+      <Sidebar />
       
       <div className="main-content">
         <header className="app-header">

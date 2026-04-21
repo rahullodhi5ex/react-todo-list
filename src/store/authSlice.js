@@ -45,6 +45,7 @@ export const logoutUser = createAsyncThunk(
   }
 )
 
+
 // =======================
 // SLICE
 // =======================
@@ -84,7 +85,7 @@ const authSlice = createSlice({
       const token = localStorage.getItem('token')
       const user = localStorage.getItem('user')
 
-      // If token & user exist → restore session
+      // If token & user exist -> restore session
       if (token && user) {
         state.token = token
         state.user = JSON.parse(user)
@@ -136,6 +137,10 @@ const authSlice = createSlice({
       // ===== LOGOUT =====
 
       .addCase(logoutUser.fulfilled, (state) => {
+        // Clear localStorage
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        
         // Clear all auth data
         state.user = null
         state.token = null

@@ -1,11 +1,26 @@
 import React from 'react'
-import { use } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 
-const Sidebar = ({ currentPage, onPageChange }) => {
+const Sidebar = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
   const { user } = useSelector((state) => state.auth)
   const { tasks } = useSelector((state) => state.tasks)
   const { projects } = useSelector((state) => state.projects)
+
+  // Get current page from location
+  const getCurrentPage = () => {
+    const path = location.pathname
+    if (path === '/' || path === '/dashboard') return 'dashboard'
+    if (path === '/tasks') return 'tasks'
+    if (path === '/projects') return 'projects'
+    if (path === '/analytics') return 'analytics'
+    if (path === '/settings') return 'settings'
+    return 'dashboard'
+  }
+
+  const currentPage = getCurrentPage()
 
   // Calculate task statistics
   const totalTasks = tasks.length
@@ -84,7 +99,7 @@ const Sidebar = ({ currentPage, onPageChange }) => {
               <li key={item.id} className="nav-item">
                 <button
                   className={`nav-button ${currentPage === item.id ? 'active' : ''}`}
-                  onClick={() => onPageChange(item.id)}
+                  onClick={() => navigate(`/${item.id}`)}
                 >
                   <span className="nav-icon">{item.icon}</span>
                   <span className="nav-label">{item.label}</span>

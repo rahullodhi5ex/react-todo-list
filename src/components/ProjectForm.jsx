@@ -19,10 +19,18 @@ const ProjectForm = ({ project, onClose }) => {
 
   useEffect(() => {
     if (project) {
+      // Format the date for HTML date input (YYYY-MM-DD)
+      const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '';
+        return date.toISOString().split('T')[0];
+      };
+      
       setFormData({
         title: project.title || '',
         description: project.description || '',
-        startdate: project.startdate || '',
+        startdate: formatDate(project.startdate),
         status: project.status === true
       })
     }

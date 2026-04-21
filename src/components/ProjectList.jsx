@@ -85,7 +85,7 @@ const ProjectList = () => {
   }
 
   return (
-    <div className="project-list">
+    <div className="task-list">
       <div className="task-list-header">
         <h2>Project Management</h2>
         <button 
@@ -97,14 +97,16 @@ const ProjectList = () => {
       </div>
 
       <div className="table-controls">
-        <div className="search-container">
-          <input
-            type="text"
-            placeholder="Search projects..."
-            value={searchTerm}
-            onChange={handleSearch}
-            className="search-input"
-          />
+        <div className="filters-section">
+          <div className="search-container">
+            <input
+              type="text"
+              placeholder="Search projects..."
+              value={searchTerm}
+              onChange={handleSearch}
+              className="search-input"
+            />
+          </div>
         </div>
         <div className="table-info">
           Showing {currentItems.length} of {sortedProjects.length} projects

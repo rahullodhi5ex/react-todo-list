@@ -40,9 +40,11 @@ authService.interceptors.response.use(
 export default {
   login: (credentials) => authService.post('/login', credentials),
   logout: () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    return Promise.resolve()
+    // Make API call first (if backend requires it), then clear localStorage
+    return authService.post('/logout').finally(() => {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+    })
   },
   getCurrentUser: () => {
     const user = localStorage.getItem('user')
